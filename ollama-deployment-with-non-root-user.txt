@@ -24,9 +24,6 @@ spec:
           name: ollama-data
 		  
 		  
-kubectl taint nodes k8s-worker node.kubernetes.io/disk-pressure:NoSchedule-
-
-
 
 - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
@@ -52,5 +49,3 @@ kubectl taint nodes k8s-worker node.kubernetes.io/disk-pressure:NoSchedule-
 		  
 process_resident_memory_bytes{job="ollama-exporter"}
 rate(process_cpu_seconds_total{job="ollama-exporter"}[5m])
-
-102938
