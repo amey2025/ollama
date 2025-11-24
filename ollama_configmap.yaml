@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-process-exporter
+  namespace: ollama
+data:
+  config.yml: |
+    process_names:
+    - name: "{{.Comm}}"
+      cmdline:
+      - ollama
+    - name: ollama-process
+      exe: ollama
+      names:
+      - ollama

@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ollama
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: ollama-sa
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - ollama
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: ollama
+        image: ollama/ollama:0.12.6
+        resources:
+          requests:
+            memory: "2048Mi" 
+            cpu: "500m"
+          limits:
+            memory: "4096Mi" 
+            cpu: "1000m"
+        volumeMounts:
+        - name: ollama-data
+          mountPath: "/root/.ollama"
+        ports:
+        - containerPort: 11434
+          name: http
+      # Sidecar container using process-exporter
+      - name: ollama-metrics
+        image: prom/node-exporter:v1.7.0
+        args:
+        - --path.procfs=/host/proc
+        - --collector.processes
+        ports:
+        - containerPort: 9100
+          name: metrics
+        resources:
+          requests:
+            memory: "100Mi" 
+            cpu: "100m"
+          limits:
+            memory: "200Mi" 
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 11434
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 11434
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: procfs
+          mountPath: /host/proc
+          readOnly: true
+      volumes:
+      - name: ollama-data
+        persistentVolumeClaim:
+          claimName: llama-model-pvc
+      - name: procfs
+        hostPath:
+          path: /proc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: ollama
+spec:
+  selector:
+    app: ollama
+  ports:
+  - name: http
+    port: 11434
+    targetPort: 11434
+  - name: metrics
+    port: 9100
+    targetPort: 9100

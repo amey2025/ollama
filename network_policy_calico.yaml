@@ -1,0 +1,82 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: ollama-calico-policy
+  namespace: ollama
+spec:
+  selector: app == 'ollama'
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Allow
+    protocol: TCP
+    source:
+      selector: app == 'open-webui'
+    destination:
+      ports:
+      - 11434
+  - action: Allow
+    protocol: TCP
+    source:
+      namespaceSelector: name == 'monitoring'
+    destination:
+      ports:
+      - 11434
+  egress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 443
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 53
+  - action: Allow
+    protocol: UDP
+    destination:
+      ports:
+      - 53
+  - action: Deny
+---
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: open-webui-calico-policy
+  namespace: ollama
+spec:
+  selector: app == 'open-webui'
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 8080
+  egress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: app == 'ollama'
+      ports:
+      - 11434
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 443
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 53
+  - action: Allow
+    protocol: UDP
+    destination:
+      ports:
+      - 53
+  - action: Deny

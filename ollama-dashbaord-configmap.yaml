@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-dashboard
+  namespace: monitoring
+data:
+  ollama-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Ollama Metrics",
+        "panels": [
+          {
+            "title": "CPU Usage",
+            "type": "graph",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "rate(process_cpu_seconds_total{job=\"ollama-metrics\",namespace=\"ollama\"}[5m])",
+                "legendFormat": "Process CPU"
+              }
+            ]
+          },
+          {
+            "title": "Memory Usage",
+            "type": "graph",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "process_resident_memory_bytes{job=\"ollama-metrics\",namespace=\"ollama\"}",
+                "legendFormat": "Process Memory"
+              }
+            ]
+          }
+        ]
+      }
+    }

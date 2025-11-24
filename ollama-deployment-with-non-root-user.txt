@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: llama-model-pvc
+  namespace: ollama
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-csi
+  
+  
+  
+  initContainers:
+      - name: create-dir
+        image: busybox
+        command: ["sh", "-c"]
+        args:
+          - mkdir -p /home/ollama/.ollama && chown -R 1001:1001 /home/ollama/.ollama
+        volumeMounts:
+        - mountPath: "/home/ollama/.ollama"
+          name: ollama-data
+		  
+		  
+kubectl taint nodes k8s-worker node.kubernetes.io/disk-pressure:NoSchedule-
+
+
+
+- job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          action: keep
+          regex: ollama
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?:(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: kubernetes_pod_name
+		  
+		  
+process_resident_memory_bytes{job="ollama-exporter"}
+rate(process_cpu_seconds_total{job="ollama-exporter"}[5m])
+
+102938
