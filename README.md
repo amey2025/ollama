@@ -11,6 +11,6 @@ Images used:
 - Kubernetes native/vanilla release 1.33, 1 master node, 1 worker node, 1 Ubuntu 24.03.4.x LTS vm acting as NFS server for storage 
 
 # Kubernetes details
-- k8s 1.33
+- k8s 1.33.5
 - Calico networking
 - rancher.io/local-path for storage class , nfs-csi & nfs-csi-openwebui for ollama storage
