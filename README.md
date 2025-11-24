@@ -14,3 +14,10 @@ Images used:
 - k8s 1.33.5
 - Calico networking
 - rancher.io/local-path for storage class , nfs-csi & nfs-csi-openwebui for ollama storage
+
+# Procedure to add models 
+- Download and run k9s tool
+- Get in to the shell of 1 of the ollama container
+- Command to download and load model from terminal with example =  ollama pull ollama:3.2 / ollama pull <model-name>:<version>
+- DeepSeek model can get downloaded but the openweb UI will throw expection while using the model due to non compatible resources i.e. nVDIA gpu requirement and other. Same for alpaca model.   It requires minimum 6gb ram to run. 
+
